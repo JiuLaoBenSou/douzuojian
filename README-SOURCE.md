@@ -26,3 +26,5 @@ npm start
 最新v0.3.1：全站用户文案审校，导出内容同步简化；移除无实际进度含义的装饰性准备状态。功能与数据范围沿用v0.3.0，原作者署名及完整许可保留。
 
 最新v0.3.2：导出文件包含https://douzuojian.com/访问引导；示例对外署名统一为豆作间原创几何示例。运行npm run build后可运行npm run release，发布目录为releases/0.3.2。实际部署需要托管账户授权，当前打包不代表已上线。
+
+2026-10-26 部署调整：源码 main、GitHub Pages 发布分支 gh-pages、Cloudflare DNS。运行 npm run build:github 生成白名单静态产物并保留 CNAME；部署配置见 docs/DEPLOYMENT.md。

@@ -2,7 +2,7 @@
 
 维护与修改：Codex，2026-10-26。v0.3.2 官网引导版，正式网站尚未部署。
 
-部署方式：先上传 GitHub，再通过 Cloudflare Pages 连接仓库构建，最后绑定 douzuojian.com。配置见 [部署说明](docs/DEPLOYMENT.md)。
+部署方式：源码保存在 GitHub 的 main 分支，网站由 GitHub Pages 发布 gh-pages 分支，Cloudflare 管理 douzuojian.com 的 DNS。配置见 [部署说明](docs/DEPLOYMENT.md)。
 
 中文用户的拼豆图案与制作助手。采用用户指定的像素动漫风：天空蓝、薄荷绿、奶油黄，方角像素窗框、硬阴影、独立 AI 浮岛插画。
 
