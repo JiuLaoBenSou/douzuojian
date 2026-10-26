@@ -1,0 +1,21 @@
+{
+  "name": "bead-pattern-studio",
+  "version": "0.3.2",
+  "private": true,
+  "type": "module",
+  "author": "Codex",
+  "license": "AGPL-3.0-only",
+  "description": "豆作间：本地图片转拼豆图纸、编辑和材料清单",
+  "scripts": {
+    "start": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "build:pages": "npm run build && npm run release",
+    "preview": "node scripts/serve.mjs --dist",
+    "release": "node scripts/prepare-release.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test": "node --test tests/engine.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

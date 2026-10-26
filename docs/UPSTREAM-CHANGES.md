@@ -1,0 +1,36 @@
+# 对上游的修改记录
+
+修改者 Codex｜2026-10-25｜本衍生应用 AGPL-3.0；版权归原权利人和各自贡献者。
+
+基于 Zippland/perler-beads，固定提交 2efee730f73dd4eb472ebde443a022d11f98bc21。完整原样基线在 upstream/Zippland-perler-beads，保持不动；源码下载包含构建所需的原文件，不运行上游 Next.js 应用及其依赖。
+
+- `src/lib/upstream-pixelation.js`：由原 `src/utils/pixelation.ts` 去除 TypeScript 类型生成，保留 Oklab 距离、网格取色和透明格逻辑；本地 ESM 路径替换、去掉调试输出。原算法作者/版权仍为 Zippland 与原贡献者。
+- `src/lib/upstream-editing.js`：由原 `src/utils/pixelEditingUtils.ts` 去类型生成；修正 MappedPixel 为 type-only import 后再转换，保留不可变单格修改与统计；导入改为本地 ESM。
+- `src/data/upstream-color-mapping.json`：原 colorSystemMapping.json 的字节副本。运行页面仅使用其中 MARD 列，标为上游参考版，不声称为官方当前 291 色或实测值。
+- `scripts/prepare-upstream.mjs`：可复现上述变换，不改原样文件。Node 的 stripTypeScriptTypes 是构建阶段功能，浏览器不运行 TypeScript。
+- 本地新增：Worker 调度、颜色上限/可用色选择、上传尺寸限制、原创几何库、中文天空像素界面、撤销/画笔/橡皮、带色号 PNG 与用量 CSV、厂商资料摘要手册。
+- 当前不包含：原项目捐赠界面、账号/云存储、多品牌切换、社区投稿。完整原样快照保留原文件与声明，并未删除上游基线内容。
+
+应用页脚提供原项目、完整许可、关于/无担保说明以及 `source.zip`。构建自动生成本运行版本的对应源码，包含必要原 TypeScript 与色表、修改后的客户端和构建/测试脚本。源码包不靠上游仓库链接替代本版本实际源码。
+
+原 LICENSE 包含中文开源共创声明和 GNU AGPLv3 正文，根 LICENSE 保留原文件全部字节。网页标示 AI 插画与参考色板边界；没有把烫豆资料摘要写为原创实测。
+
+## v0.2.0 图纸阅读改进
+
+Codex，2026-10-25：新增src/lib/chart.js，统一坐标几何、命中格、分区与连续笔画；重做render/export，四边坐标、色号、辅助线/板缝分开、底部色块用量和总数。app增加板型/精确宽高、比例联动、固定单格缩放和平移、原图对照、完整色板补色。改变与引用的是自有界面/集成模块，不改原上游快照和生成的核心JS。两份原工具TS及许可仍随源码包提供，新增chart.js和扩充后的测试也在本版本对应源码包中。
+
+## v0.2.1 连续缩放
+
+Codex，2026-10-25：chart.js新增滚轮归一化倍率与鼠标锚点滚动计算；app.js用requestAnimationFrame合并滚轮事件、缓存未改动图纸栅格、更新CSS视图与锚点，缩放不重建整张Canvas；移除固定倍率下拉及小倍率隐藏色号逻辑。HTML/CSS加入任意百分比、加减/适应/100%控件，色号始终绘制。扩充两项核心测试。原上游文件和许可不改。
+
+## v0.3.0 图纸库、自动适配与矢量读图
+
+Codex，2026-10-26：新增catalog.js校验、组合搜索和精确色号载入；library.js补来源/作者/分类/许可字段；新增#library列表及#library/id详情。换板默认按原图比例适配并启动Worker，取消旧任务避免旧结果覆盖，支持关闭自动适配保留多板图。屏幕读图由固定Canvas位图改为SVG逐格文字，缩放保留鼠标锚点，PNG导出仍独立Canvas绘制。新增回归测试及图纸接入说明。上游快照、色表和完整许可保持不变。
+
+## v0.3.1 用户文案审校
+
+Codex，2026-10-26：审校首页、图库/详情、工坊、手册、关于、加载/空/成功/失败状态及PNG/CSV文字。去掉泛化宣传、卡片重复署名、提交号和实现术语；作者/来源保留在详情，AGPL与对应源码入口保留。移除重复的HP/MP/EXP准备状态及其无实际进度含义的装饰条；导出按钮和禁用条件不变。手册仅改写已有资料，日期仍为2026-10-25，不声称新增实物验证。
+
+## v0.3.2 官网引导与发布准备
+
+Codex，2026-10-26：site.js集中配置https://douzuojian.com/及署名格式；PNG底部新增网址引导，CSV新增网站行。示例公开署名为豆作间原创几何示例，其他作者来源仍保留。canonical设为该域名。prepare-release只打包manifest中公开资源及静态托管配置，不复制内部研究、用户附件、凭据或开发manifest。用户本轮已授权部署，但当前CLI缺Pages/DNS权限且浏览器控制被安全检查终止，未部署成功。

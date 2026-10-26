@@ -1,0 +1,19 @@
+dist/
+node_modules/
+*.log
+releases/
+.wrangler/
+
+# Local research, user references and QA evidence are not publication sources.
+docs/*
+!docs/CATALOG.md
+!docs/UPSTREAM-CHANGES.md
+!docs/DEPLOYMENT.md
+skills/
+scripts/research-audit.mjs
+scripts/extract-artkal-research.py
+.env
+.env.*
+!.env.example
+*.pem
+*.key
