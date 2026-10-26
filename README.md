@@ -1,6 +1,6 @@
 # 豆作间｜拼豆图案与制作助手
 
-维护与修改：Codex，2026-10-26。v0.3.2 官网引导版，正式网站尚未部署。
+维护与修改：Codex，2026-10-26。v0.3.2 官网引导版，已部署至 GitHub Pages：[douzuojian.com](https://douzuojian.com/)。
 
 部署方式：源码保存在 GitHub 的 main 分支，网站由 GitHub Pages 发布 gh-pages 分支，Cloudflare 管理 douzuojian.com 的 DNS。配置见 [部署说明](docs/DEPLOYMENT.md)。
 
