@@ -27,3 +27,16 @@ test('sync queue coalesces saves and retries a failed job without losing later e
  queue.request();queue.request();await queue.flush();assert.equal(runs,1);assert.equal(queue.status().phase,'error');
  queue.request();const flushing=queue.flush();await new Promise(r=>setTimeout(r,10));queue.request();release();await new Promise(r=>setTimeout(r,10));release();await flushing;assert.equal(runs,3);assert.equal(queue.status().phase,'synced');queue.close();
 });
+
+const liveChecks=await import('../scripts/sync-catalog.mjs');
+test('live HTML verification accepts only the exact known Cloudflare injection and still rejects changed page bytes',()=>{
+ const original=Buffer.from('<!doctype html><body>图纸</body>\r\n');
+ const injection="<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML=\"window.__CF$cv$params={r:'a5105fdf8a652b25',t:'MTc5MzA5MDIwMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);\";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>";
+ const live=Buffer.from(original.toString().replace('</body>',injection+'</body>'));
+ assert.equal(typeof liveChecks.liveFileMatch,'function');
+ assert.equal(liveChecks.liveFileMatch('index.html',original,live),'cloudflare-jsd');
+ assert.equal(liveChecks.liveFileMatch('index.html',original,original),'exact');
+ assert.equal(liveChecks.liveFileMatch('index.html',original,Buffer.from(live.toString().replace('图纸','改字'))),null);
+ assert.equal(liveChecks.liveFileMatch('index.html',original,Buffer.from(live.toString().replace("a.height=1","a.height=2"))),null);
+ assert.equal(liveChecks.liveFileMatch('app.js',original,live),null);
+});

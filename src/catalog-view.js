@@ -27,7 +27,7 @@ export function createLibraryView({getPalette,getRevision,onOpen,notify}){
  }
  function reset(){category='全部';page=1;$('#pattern-search').value='';for(const id of ['catalog-series','catalog-section','catalog-collection','catalog-size','catalog-colors'])$('#'+id).value='all';$('#catalog-sort').value='default';categories();refinements();list();}
  async function detail(id){
-  const request=++detailSerial;if(phase!=='ready'){$('#pattern-detail').innerHTML=phase==='error'?'<div class="catalog-empty"><p>图纸目录没有加载成功。</p><button class="small-button" id="retry-detail-index">重新读取目录</button></div>':'<p class="loading-copy">图纸目录正在加载…</p>';$('#retry-detail-index')?.addEventListener('click',init);return;}
+  const request=++detailSerial;if(phase!=='ready'){$('#pattern-detail').innerHTML=phase==='error'?'<div class="catalog-empty"><p>图纸目录没有加载成功。</p><button class="small-button" id="retry-detail-index">重新读取目录</button></div>':'<p class="loading-copy">图纸目录正在加载…</p>';$('#retry-detail-index')?.addEventListener('click',()=>init());return;}
   const meta=entries.find(p=>p.id===id);if(!meta){$('#pattern-detail').innerHTML='<div class="pixel-frame catalog-empty"><p>找不到这张图纸。</p><a href="#library">返回图纸库</a></div>';return;}
   $('#pattern-detail').innerHTML='<p class="loading-copy" role="status">正在读取'+esc(meta.name)+'…</p>';
   try{
@@ -47,7 +47,7 @@ export function createLibraryView({getPalette,getRevision,onOpen,notify}){
    $('#catalog-local-note').hidden=!index.localPreview;$('#catalog-local-note').textContent=index.localPreview?'本地预览：含 '+entries.filter(p=>p.status==='draft').length+' 张数据化草稿，色号与来源仍待核对。':'';
    refinements();
    categories();list();$('#featured-patterns').innerHTML=entries.filter(p=>p.status==='ready').slice(0,3).map(card).join('');bind($('#featured-patterns'));if(view==='pattern-detail')detail(detailId);
-  }catch{phase='error';$('#pattern-list').innerHTML='<div class="catalog-empty"><p>图纸目录没有加载成功。</p><button class="small-button" id="retry-catalog">重新读取</button></div>';$('#retry-catalog').addEventListener('click',init);if(view==='pattern-detail')detail(detailId);notify('图纸目录暂时无法读取，其他编辑功能仍可使用。');}
+  }catch{phase='error';$('#pattern-list').innerHTML='<div class="catalog-empty"><p>图纸目录没有加载成功。</p><button class="small-button" id="retry-catalog">重新读取</button></div>';$('#retry-catalog').addEventListener('click',()=>init());if(view==='pattern-detail')detail(detailId);notify('图纸目录暂时无法读取，其他编辑功能仍可使用。');}
  }
  async function checkUpdates(){if(checking||!publicUpdates||document.hidden||!['library','pattern-detail'].includes(view))return;checking=true;try{const next=validateCatalogIndex(await fetchJson('/catalog/index.json'));if(next.contentVersion&&next.contentVersion!==contentVersion)await init(next);}catch{}finally{checking=false;}}
  setInterval(checkUpdates,30000);document.addEventListener('visibilitychange',checkUpdates);
