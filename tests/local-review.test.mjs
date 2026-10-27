@@ -41,6 +41,20 @@ test('stale revision, unknown codes, duplicate and out-of-grid edits reject atom
  await r.save('draft-one',{revision:base.revision,changes:[{row:1,column:1,code:'H01'}]});
  await assert.rejects(r.save('draft-one',{revision:base.revision,changes:[{row:1,column:2,code:'H07'}]}),e=>e.status===409);
 });
+test('all 291 canonical MARD codes, including unpadded ZG codes, survive save and restart',async t=>{
+ const f=await fixture(t),{createPaletteRegistry}=await import('../src/lib/palettes.js'),codes=createPaletteRegistry(mapping).get('mard').colors.map(c=>c.key);
+ assert.equal(codes.length,291);assert(codes.includes('ZG6'));
+ const index=JSON.parse(await readFile(join(f.dir,'batch/final/index.json'),'utf8'));
+ Object.assign(index.entries[0],{width:20,height:15,total:291,colorCount:1,unknownCount:0});
+ await writeFile(join(f.dir,'batch/final/index.json'),JSON.stringify(index));await writeFile(join(f.dir,'dist/catalog/index.json'),JSON.stringify(index));
+ await writeFile(join(f.dir,'batch/final/catalog/charts/draft-one.json'),JSON.stringify({schema:1,id:'draft-one',width:20,height:15,colorCodes:['H07'],encoding:'flat',cells:[...Array(291).fill(0),...Array(9).fill(null)]}));
+ let r=await createLocalReview({root:f.root,batch:f.batch});const base=await r.chart('draft-one');
+ const expected=[...codes,...Array(9).fill(null)],saved=await r.save('draft-one',{revision:base.revision,changes:codes.map((code,i)=>({row:Math.floor(i/20)+1,column:i%20+1,code}))});
+ assert.deepEqual(saved.values,expected);assert.equal(saved.meta.total,291);assert.equal(saved.meta.colorCount,291);
+ r=await createLocalReview({root:f.root,batch:f.batch});assert.deepEqual((await r.chart('draft-one')).values,expected);
+ const undone=await r.undo('draft-one',{revision:saved.revision});assert.deepEqual(undone.values,base.values);
+ const redone=await r.redo('draft-one',{revision:undone.revision});assert.deepEqual(redone.values,expected);
+});
 test('undo restores white, unknown and empty separately and records a new manual revision',async t=>{
  const f=await fixture(t),r=await createLocalReview({root:f.root,batch:f.batch}),base=await r.chart('draft-one');
  const changed=await r.save('draft-one',{revision:base.revision,changes:[{row:1,column:1,code:'H01'},{row:2,column:1,code:'H07'},{row:1,column:2,code:null}]});
@@ -72,4 +86,13 @@ test('a whole 1600-bead color can be replaced in one save and undone; only saved
  const savedEvents=[],r=await createLocalReview({root:f.root,batch:f.batch,onSaved:e=>savedEvents.push(e)}),before=await r.chart('draft-one');assert.equal(savedEvents.length,0);
  const saved=await r.save('draft-one',{revision:before.revision,changes:Array.from({length:1600},(_,i)=>({row:Math.floor(i/40)+1,column:i%40+1,code:'H01'}))});assert(saved.values.every(v=>v==='H01'));assert.equal(saved.meta.total,1600);assert.equal(savedEvents.length,1);
  const undone=await r.undo('draft-one',{revision:saved.revision});assert(undone.values.every(v=>v==='H07'));assert.equal(savedEvents.length,2);
+});
+
+test('saved undo and redo support multiple steps, restart, legacy journals, and invalidate redo on a new save',async t=>{
+ const f=await fixture(t);let r=await createLocalReview({root:f.root,batch:f.batch}),base=await r.chart('draft-one');
+ let a=await r.save('draft-one',{revision:base.revision,changes:[{row:1,column:1,code:'G02'},{row:1,column:2,code:null}]}),b=await r.save('draft-one',{revision:a.revision,changes:[{row:2,column:1,code:'H01'}]});
+ assert.equal(typeof r.redo,'function');let u=await r.undo('draft-one',{revision:b.revision});assert.deepEqual(u.values,a.values);assert.equal(u.canRedo,true);u=await r.undo('draft-one',{revision:u.revision});assert.deepEqual(u.values,base.values);assert.equal(u.canUndo,false);
+ r=await createLocalReview({root:f.root,batch:f.batch});let redo=await r.redo('draft-one',{revision:u.revision});assert.deepEqual(redo.values,a.values);redo=await r.redo('draft-one',{revision:redo.revision});assert.deepEqual(redo.values,b.values);assert.equal(redo.canRedo,false);
+ const file=join(f.dir,'.local-review/state.json'),journal=JSON.parse(await readFile(file,'utf8'));delete journal.charts['draft-one'].undoStack;delete journal.charts['draft-one'].redoStack;await writeFile(file,JSON.stringify(journal));r=await createLocalReview({root:f.root,batch:f.batch});
+ u=await r.undo('draft-one',{revision:redo.revision});assert.deepEqual(u.values,a.values);let changed=await r.save('draft-one',{revision:u.revision,changes:[{row:2,column:2,code:'B06'}]});assert.equal(changed.canRedo,false);await assert.rejects(r.redo('draft-one',{revision:changed.revision}),e=>e.status===400);
 });

@@ -13,7 +13,7 @@ if(reviewIndex!==-1&&(!args[reviewIndex+1]||args[reviewIndex+1].startsWith('--')
 if(args.includes('--auto-publish')&&reviewIndex===-1)throw new Error('Auto publish requires the local review server');
 const syncService=args.includes('--auto-publish')?await createCatalogSyncService(fileURLToPath(new URL('../',import.meta.url))):null;
 const review=reviewIndex===-1?null:await createLocalReview({root:new URL('../',import.meta.url),batch:args[reviewIndex+1],syncService,onSaved:()=>syncService?.request()});
-const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.webp':'image/webp','.md':'text/plain; charset=utf-8','.zip':'application/zip'};
+const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.webp':'image/webp','.md':'text/plain; charset=utf-8','.txt':'text/plain; charset=utf-8','.zip':'application/zip'};
 const server=createServer(async(request,response)=>{
  response.setHeader('Cache-Control','no-store');response.setHeader('X-Content-Type-Options','nosniff');
  response.setHeader('Content-Security-Policy',"default-src 'self'; connect-src 'self'; img-src 'self' blob: data:; worker-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'");

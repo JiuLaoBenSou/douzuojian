@@ -332,3 +332,11 @@ test('catalog collections separate generation pokedex, special forms and other f
  assert.deepEqual(facets.collections.map(p=>p.value),['pokemon-gen1-pokedex','pokemon-gen2-pokedex']);
  assert.equal(catalog.filterPatterns(entries,{series:'三丽鸥',collection:'pokemon-gen1-pokedex'}).length,0);
 });
+
+const editHistory=await import('../src/lib/edit-history.js').catch(()=>({}));
+test('edit history redoes complete snapshots including palette, bounds undo, and drops redo after a new edit',()=>{
+ assert.equal(typeof editHistory.pushEdit,'function');const a={grid:[[null,'H01']],chartBrand:'mard'},b={grid:[['H07','H01']],chartBrand:'coco'},c={grid:[['H07',null]],chartBrand:'coco'};
+ let h=editHistory.pushEdit({past:[],future:[]},a,2),u=editHistory.moveEdit(h,b,'undo');assert.deepEqual(u.value,a);assert.equal(u.past.length,0);assert.equal(u.future.length,1);
+ const r=editHistory.moveEdit(u,a,'redo');assert.deepEqual(r.value,b);assert.equal(r.future.length,0);assert.equal(editHistory.moveEdit(r,b,'redo').changed,false);
+ h=editHistory.pushEdit(u,a,2);assert.deepEqual(h.future,[]);assert.equal(editHistory.moveEdit(h,c,'redo').changed,false);h=editHistory.pushEdit(editHistory.pushEdit(h,b,2),c,2);assert.equal(h.past.length,2);
+});

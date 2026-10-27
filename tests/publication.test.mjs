@@ -28,6 +28,23 @@ test('sync queue coalesces saves and retries a failed job without losing later e
  queue.request();const flushing=queue.flush();await new Promise(r=>setTimeout(r,10));queue.request();release();await new Promise(r=>setTimeout(r,10));release();await flushing;assert.equal(runs,3);assert.equal(queue.status().phase,'synced');queue.close();
 });
 
+test('publishing and later saving one collection retains other published collections byte for byte',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'douzuojian-collections-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const put=async(p,v)=>{await mkdir(join(root,p,'..'),{recursive:true});await writeFile(join(root,p),JSON.stringify(v));};
+ await put('src/data/upstream-color-mapping.json',JSON.parse(await readFile(new URL('../src/data/upstream-color-mapping.json',import.meta.url),'utf8')));
+ const meta=(id,collectionId,number)=>({id,number,name:id,category:'动漫游戏',series:'宝可梦',section:'图鉴',collection:collectionId,collectionId,author:'作者待核对',source:{label:'用户提供的图纸'},license:'仅本地预览',palette:'MARD',status:'draft',width:2,height:2,total:2,colorCount:1,unknownCount:0,data:`/catalog/charts/${id}.json`,thumbnail:`/catalog/thumbs/${id}.png`});
+ const save=async p=>{await put('.local-catalog/index.json',{schema:1,localPreview:true,entries:[p]});await put(p.data.replace('/catalog/','.local-catalog/catalog/'),{schema:1,id:p.id,width:2,height:2,colorCodes:['H01'],encoding:'flat',cells:[0,null,null,0]});return publication.preparePublicCatalog({root});};
+ const kanto=meta('pokemon-kanto-001','pokemon-gen1-pokedex',1),johto=meta('pokemon-johto-152','pokemon-johto-100',152);
+ await save(kanto);const firstBytes=await readFile(join(root,'catalog-content/charts/pokemon-kanto-001.json'));
+ const added=await save(johto);assert.equal(added.entries,2);
+ assert.deepEqual(await readFile(join(root,'catalog-content/charts/pokemon-kanto-001.json')),firstBytes);
+ const secondBytes=await readFile(join(root,'catalog-content/charts/pokemon-johto-152.json'));
+ assert.equal(JSON.parse(secondBytes).id,'pokemon-johto-152');
+ const saved=await save(kanto);assert.equal(saved.entries,2);
+ assert.deepEqual(await readFile(join(root,'catalog-content/charts/pokemon-johto-152.json')),secondBytes);
+ const again=await save(kanto);assert.equal(saved.version,again.version);assert.equal(again.changed,false);
+});
+
 const liveChecks=await import('../scripts/sync-catalog.mjs');
 test('live HTML verification accepts only the exact known Cloudflare injection and still rejects changed page bytes',()=>{
  const original=Buffer.from('<!doctype html><body>图纸</body>\r\n');
