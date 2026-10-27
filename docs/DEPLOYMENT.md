@@ -43,3 +43,17 @@
 截至准备本说明时：源码 main 已上传；GitHub Pages 与域名发布状态需依据实际接口结果继续核对。本地构建、云端构建、DNS 与证书状态分别记录，不相互替代。
 
 官方文档：[GitHub 自定义域](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site)、[Pages REST API](https://docs.github.com/en/rest/pages/pages)、[Cloudflare DNS 代理状态](https://developers.cloudflare.com/dns/proxy-status/)。
+## 保存后的图纸自动同步（2026-10-27 最新用户授权）
+
+用户已改为先发布当前保存版、后续本地校对保存后自动更新。新流程取代上文仅手动明确上线时推送的旧说明；人工后台和原图仍只在本机。
+
+- `node scripts/sync-catalog.mjs --snapshot`：只生成公开数据快照`catalog-content/`，不推送。
+- `node scripts/sync-catalog.mjs --deploy --full`：首次完整发布，main源数据先上传、再更新gh-pages并验证。
+- `npm run sync:catalog`：对比当前已保存图纸与线上；无差异不部署。
+- `node scripts/serve.mjs --dist --port 3045 --local-review docs/batch-gen1-2026-10-27/translation-final --auto-publish`：本地校对服务保存/撤回后自动排队同步。
+
+自动任务从远端main克隆隔离目录，只提交公开图纸文件；不把本地未提交源码自动带上线上。远端变化导致非快进时保留错误并重试，不强推。任务生成的工作目录位于被Git忽略的releases/，不得当作新的项目权威目录。
+
+数据快照规范化精确色号、空格、色数、颗数、分类与缩略图，排除原图/人工日志/绝对路径；有未知格的图暂时保留上一公开版本。相同快照版本不产生新提交。线上catalog/content-version.json记录内容哈希，活动图库每30秒检查一次索引版本，更新后重读数据；不覆盖用户正在工坊编辑的内容。
+
+同步状态保存在.local-review/sync-state.json，失败保留本地修改，校对页提供重试。电脑/服务关闭时不会更新；再次启动会恢复尚未完成的任务。GitHub Pages为静态托管，没有在云端运行校对API。

@@ -28,3 +28,15 @@ npm start
 最新v0.3.2：导出文件包含https://douzuojian.com/访问引导；示例对外署名统一为豆作间原创几何示例。运行npm run build后可运行npm run release，发布目录为releases/0.3.2。实际部署需要托管账户授权，当前打包不代表已上线。
 
 2026-10-26 部署调整：源码 main、GitHub Pages 发布分支 gh-pages、Cloudflare DNS。运行 npm run build:github 生成白名单静态产物并保留 CNAME；部署配置见 docs/DEPLOYMENT.md。
+
+
+## v0.4.0 多品牌参考色板与图纸库
+
+Codex，2026-10-27：新增 palettes.js 独立对照层与七品牌色板，保留原始上游映射文件字节。按用户提供对照图隔离缺失/冲突，补充可辨认的漫漫映射与小舞/黄豆豆条目。一键换号按参考行更换编号，保留颜色/图案/颗数；有缺失则整张不变，支持跨品牌撤销。生成和画笔区分所选与当前图纸品牌，PNG/CSV 跟随当前图纸。数据版本 reference-2026-10-27；详见 docs/PALETTES.md，非品牌官方实测 RGB。
+
+2026-10-27 交互调整（Codex）：取消独立换号按钮，选择色板立即换号；撤销同步恢复原色板选项，打开图库图纸时自动按所选色板换号。MARD 原始 291 条色号与 HEX 完整保留，缺项不反向删减主色板。
+
+
+2026-10-27（Codex）：catalog-view.js / lib/catalog-store.js 为目录摘要、独立图纸加载与本地草稿展示模块。scripts/catalog-build.mjs 从随包的4张原创示例生成 catalog/index.json、单图JSON及独立PNG图片；该脚本已纳入对应源码包，默认构建可复现。第三方用户图纸的本地研究素材和 `.local-catalog` 不属于公开构建与源码ZIP；它们只能通过本机显式 --local-catalog 预览，并保留草稿、来源待核标志。
+
+2026-10-27 最新发布范围：用户授权将当前已保存的第一代151张转译图纸先发布，后续本机校对保存后经GitHub自动同步。公开catalog-content/包含可复现的图纸数据及缩略图，不含原JPEG/人工日志。本机校对工具源码随包提供，服务与资料不部署到公网。早先“仅4原创”和“第三方数据仅本地”的段落记录的是当时状态，当前范围以上述新说明为准。

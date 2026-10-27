@@ -18,6 +18,9 @@ export function summarize(grid) {
   return {total:stats.totalCount,colors:[...byKey.values()].sort((a,b)=>b.count-a.count||a.key.localeCompare(b.key,'en',{numeric:true}))};
 }
 export function paintCell(grid,row,col,color){return paintSinglePixel(grid,row,col,color?{key:color.key,color:color.hex??color.color}:transparentColorData).newPixelData;}
-export function materialCsv(grid,name='豆作间图纸') {
-  const clean=String(name).replace(/[\r\n]/g,' ').replace(/^(?=\s*[=+@-])/,'_').replaceAll('"','""');return '\uFEFF图案,"'+clean+'"\r\n色板,MARD 参考色板（291 色）\r\n网站,'+SITE_URL+'\r\n色号,参考HEX,颗数\r\n'+summarize(grid).colors.map(c=>`${c.key},${c.color},${c.count}`).join('\r\n')+'\r\n';
+export function mirrorHorizontal(grid){return grid.map(row=>[...row].reverse().map(cell=>({...cell})));}
+export function materialCsv(grid,name='豆作间图纸',options={}) {
+  const clean=String(name).replace(/[\r\n]/g,' ').replace(/^(?=\s*[=+@-])/,'_').replaceAll('"','""');
+  const label=options.paletteLabel??'MARD 主色板（291 色）';
+  return '\uFEFF图案,"'+clean+'"\r\n色板,'+label+'\r\n'+(options.paletteVersion?'色板版本,'+options.paletteVersion+'\r\n':'')+'网站,'+SITE_URL+'\r\n色号,参考HEX,颗数\r\n'+summarize(grid).colors.map(c=>`${c.key},${c.color},${c.count}`).join('\r\n')+'\r\n';
 }

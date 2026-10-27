@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {SITE_URL} from '../src/site.js';
 const root=new URL('../',import.meta.url),dist=new URL('dist/',root),version=JSON.parse(await readFile(new URL('package.json',root),'utf8')).version;
 const allowed=JSON.parse(await readFile(new URL('manifest.json',dist),'utf8'));
+if(JSON.parse(await readFile(new URL('catalog/index.json',dist),'utf8')).localPreview)throw new Error('本地草稿构建仅供预览；请先运行默认 npm run build，再准备发布。');
 const release=new URL('releases/'+version+'/',root);
 await mkdir(release,{recursive:true});
 for(const path of allowed){

@@ -3,12 +3,15 @@ node_modules/
 *.log
 releases/
 .wrangler/
+.local-catalog/
+.local-review/
 
 # Local research, user references and QA evidence are not publication sources.
 docs/*
 !docs/CATALOG.md
 !docs/UPSTREAM-CHANGES.md
 !docs/DEPLOYMENT.md
+!docs/PALETTES.md
 skills/
 scripts/research-audit.mjs
 scripts/extract-artkal-research.py
