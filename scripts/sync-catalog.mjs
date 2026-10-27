@@ -44,6 +44,8 @@ export async function syncCatalog({deploy=false,full=false}={}){
  if(!full&&await liveVersion()===snapshot.version){const result={phase:'noop',version:snapshot.version,sourceCommit,held:snapshot.held,changedFiles:0};event(result);return result;}
  await command(process.execPath,['scripts/build.mjs'],stage);await command(process.execPath,['scripts/prepare-release.mjs'],stage);await command(process.execPath,['scripts/prepare-github.mjs'],stage);await command(process.execPath,['scripts/verify.mjs'],stage);
  const publicDir=resolve(stage,'releases/github-pages'),siteDir=await mkdtemp(resolve(root,'releases/site-'));await git(['clone','--branch','gh-pages','--single-branch','--no-tags',remote,siteDir],root);await identity(siteDir);
+ // Preserve release bytes; Windows Git newline conversion would invalidate file hashes.
+ await git(['config','core.autocrlf','false'],siteDir);
  const publicFiles=await walk(pathToFileURL(publicDir+'/')),expected=new Set(publicFiles),oldFiles=(await git(['ls-files'],siteDir)).stdout.trim().split(/\r?\n/).filter(Boolean);
  for(const old of oldFiles)if(!expected.has(old))throw new Error('Unexpected existing public file; retain it for manual review: '+old);
  for(const path of publicFiles){const target=resolve(siteDir,path);await mkdir(resolve(target,'..'),{recursive:true});await writeFile(target,await readFile(resolve(publicDir,path)));}
