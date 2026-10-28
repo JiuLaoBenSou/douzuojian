@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {prepareEntry} from './startup-html.mjs';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
@@ -20,7 +21,7 @@ assert.deepEqual(await readFile(new URL('LICENSE',root)),await readFile(new URL(
 console.log('PROVENANCE_OK MARD=291 unique keys; mapping + LICENSE byte-exact');
 const manifest=JSON.parse(await readFile(new URL('dist/manifest.json',root),'utf8'));
 const copied=manifest.filter(p=>!p.startsWith('catalog/')&&!['LICENSE','THIRD-PARTY-NOTICES.md','source.zip'].includes(p));
-for(const path of copied)assert.deepEqual(await readFile(new URL('src/'+path,root)),await readFile(new URL('dist/'+path,root)));
+for(const path of copied)assert.deepEqual(path==='index.html'?Buffer.from(await prepareEntry(root)):await readFile(new URL('src/'+path,root)),await readFile(new URL('dist/'+path,root)));
 console.log('DIST_MATCH '+copied.length+'/'+copied.length+' source app files');
 const catalog=validateCatalogIndex(JSON.parse(await readFile(new URL('dist/catalog/index.json',root),'utf8'))),originals=createCatalog(patterns,palette);
 for(const p of catalog.entries){
