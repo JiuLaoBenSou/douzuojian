@@ -1,5 +1,5 @@
 // Original code-drawn geometric patterns by Codex, 2026-10-25. No third-party IP artwork.
-import { findClosestPaletteColor, summarize } from './lib/engine.js?v=669908800f8c5daa';
+import { findClosestPaletteColor, summarize } from './lib/engine.js?v=0b44566f26038ed7';
 const make=(id,name,category,note,colors,rule)=>({id,name,category,note,tags:[category,'小图'],width:16,height:16,author:'豆作间',source:{label:'豆作间原创几何示例'},license:'AGPL-3.0',permissionStatus:'ready',palette:'MARD',colors,cells:Array.from({length:256},(_,i)=>rule(i%16,Math.floor(i/16)))});
 export const patterns=[
   make('bow','像素蝴蝶结','几何','左右对称的蝴蝶结。',['#497da7','#ffb8c7','#ffe3d6','#d7effa'],(x,y)=>{const d=Math.abs(y-7.5);if(x>=7&&x<=8&&d<=1.5)return 0;const local=x<8?x:15-x;if(local>=2&&local<=6&&d<=(local-1)*.8&&d<=(7-local)*1.8)return d>(local-1)*.8-1.2?0:(y<8?1:2);return null;}),

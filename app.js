@@ -1,15 +1,15 @@
 // Douzuojian chart reader by Codex, 2026-10-25; brand palettes added 2026-10-27. AGPL-3.0.
-import {pushEdit,moveEdit} from './lib/edit-history.js?v=669908800f8c5daa';
-import {patterns,patternGrid} from './library.js?v=669908800f8c5daa';
-import {createCatalog,escapeHtml as esc} from './catalog.js?v=669908800f8c5daa';
-import {createLibraryView} from './catalog-view.js?v=669908800f8c5daa';
-import {summarize,paintCell,materialCsv,mirrorHorizontal} from './lib/engine.js?v=669908800f8c5daa';
-import {thumbnailSvg,drawVectorGrid,chartSvg} from './lib/render.js?v=669908800f8c5daa';
-import {downloadBlob,exportPng} from './lib/export.js?v=669908800f8c5daa';
-import {chartGeometry,hitCell,boardLayout,boardPresets,chartDimensions,fitBoardDimensions,lineCells,codeInk,wheelScale,zoomScroll} from './lib/chart.js?v=669908800f8c5daa';
-import {guides} from './guides.js?v=669908800f8c5daa';
-import {createPaletteRegistry,convertChartPalette,findPaletteColor} from './lib/palettes.js?v=669908800f8c5daa';
-import {createTouchSession,pinchScale,pinchScroll,cancelTouchStroke} from './lib/gestures.js?v=669908800f8c5daa';
+import {pushEdit,moveEdit} from './lib/edit-history.js?v=0b44566f26038ed7';
+import {patterns,patternGrid} from './library.js?v=0b44566f26038ed7';
+import {createCatalog,escapeHtml as esc} from './catalog.js?v=0b44566f26038ed7';
+import {createLibraryView} from './catalog-view.js?v=0b44566f26038ed7';
+import {summarize,paintCell,materialCsv,mirrorHorizontal} from './lib/engine.js?v=0b44566f26038ed7';
+import {thumbnailSvg,drawVectorGrid,chartSvg} from './lib/render.js?v=0b44566f26038ed7';
+import {downloadBlob,exportPng} from './lib/export.js?v=0b44566f26038ed7';
+import {chartGeometry,hitCell,boardLayout,boardPresets,chartDimensions,fitBoardDimensions,lineCells,codeInk,wheelScale,zoomScroll} from './lib/chart.js?v=0b44566f26038ed7';
+import {guides} from './guides.js?v=0b44566f26038ed7';
+import {createPaletteRegistry,convertChartPalette,findPaletteColor} from './lib/palettes.js?v=0b44566f26038ed7';
+import {createTouchSession,pinchScale,pinchScroll,cancelTouchStroke} from './lib/gestures.js?v=0b44566f26038ed7';
 const $=s=>document.querySelector(s),canvas=$('#pattern-canvas'),scroller=$('#canvas-scroller');
 const state={palette:[],selectedBrand:'mard',chartBrand:'mard',availableByBrand:new Map(),available:new Set(),grid:[],image:null,chartCredit:null,name:'春日小花',sourceName:'春日小花',gridLines:true,codes:true,tool:'pan',brush:null,history:[],future:[],busy:false,dirty:false,filter:'全部',zoom:0,boardColumns:52,boardRows:52};
 let palettes=new Map();
@@ -140,7 +140,7 @@ function convertPalette(){
  status.textContent='已换成'+target.name+'色号，共 '+result.total+' 颗；可点“撤销”恢复。';toast('已换成'+target.name+'色号。');
 }
 function syncDimensions(changed=dimensionAnchor){dimensionAnchor=changed;const s=state.image??{width:1,height:1},d=chartDimensions(s.width,s.height,$('#grid-width').value,$('#grid-height').value,$('#keep-aspect').checked,changed);$('#grid-width').value=d.width;$('#grid-height').value=d.height;return d;}
-function generate(){if(!state.image){toast('请先选择图片。');return;}const palette=state.palette.filter(c=>state.available.has(c.key));if(!palette.length){toast('请至少选择一种可用颜色。');return;}const {width,height}=syncDimensions();stopWorker();state.busy=true;state.dirty=true;$('#processing-status').textContent='正在生成图纸…';$('#processing-status').hidden=false;$('#cancel-generate').hidden=false;refresh();worker=new Worker(new URL('./worker.js?v=669908800f8c5daa',import.meta.url),{type:'module'});const active=worker,name=state.sourceName,brand=state.selectedBrand;
+function generate(){if(!state.image){toast('请先选择图片。');return;}const palette=state.palette.filter(c=>state.available.has(c.key));if(!palette.length){toast('请至少选择一种可用颜色。');return;}const {width,height}=syncDimensions();stopWorker();state.busy=true;state.dirty=true;$('#processing-status').textContent='正在生成图纸…';$('#processing-status').hidden=false;$('#cancel-generate').hidden=false;refresh();worker=new Worker(new URL('./worker.js?v=0b44566f26038ed7',import.meta.url),{type:'module'});const active=worker,name=state.sourceName,brand=state.selectedBrand;
  active.onmessage=e=>{if(worker!==active)return;stopWorker();if(e.data.error){toast(e.data.error);refresh();return;}state.grid=e.data.grid;state.chartBrand=brand;state.name=name;state.history=[];state.future=[];state.dirty=false;state.brush=summarize(state.grid).colors[0]??state.palette[0];updateBrushPicker();$('#conversion-status').hidden=true;resetView();refresh();toast('图纸已生成。');};active.onerror=()=>{if(worker!==active)return;stopWorker();toast('生成失败，请缩小图片后重试。');refresh();};active.postMessage({image:state.image,width,height,palette,mode:$('#mode-select').value,maxColors:Number($('#max-colors').value)});}
 async function upload(file){if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)){toast('请选择 JPG、PNG 或 WebP 图片。');return;}if(file.size>12*1024*1024){toast('图片超过 12 MB，请压缩后重试。');return;}const serial=++uploadSerial;stopWorker();const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();if(serial!==uploadSerial)return;if(img.naturalWidth*img.naturalHeight>20000000||img.naturalWidth/img.naturalHeight>8||img.naturalHeight/img.naturalWidth>8)throw new Error('图片需小于 2000 万像素，长宽比不超过 8:1。请压缩或裁剪后重试。');const scale=Math.min(1,1024/Math.max(img.naturalWidth,img.naturalHeight)),source=document.createElement('canvas');source.width=Math.max(1,Math.round(img.naturalWidth*scale));source.height=Math.max(1,Math.round(img.naturalHeight*scale));const ctx=source.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,source.width,source.height);const data=ctx.getImageData(0,0,source.width,source.height);state.image={width:data.width,height:data.height,data:data.data};state.chartDraft=false;state.chartCredit=null;state.sourceName=file.name.replace(/\.[^.]+$/,'').slice(0,40)||'我的图案';$('#image-name').textContent=file.name;$('#keep-aspect').checked=true;if($('#auto-fit-board').checked)fitCurrentBoard();else{$('#grid-width').value=32;syncDimensions('width');}drawOriginal();location.hash='studio';generate();}catch(e){toast(e.message?.startsWith('图片')?e.message:'无法读取这张图片，请换一张再试。');}finally{URL.revokeObjectURL(url);$('#image-upload').value='';}}
 function pointAt(e){return hitCell(e.clientX,e.clientY,canvas.getBoundingClientRect(),chartGeometry(state.grid[0].length,state.grid.length));}

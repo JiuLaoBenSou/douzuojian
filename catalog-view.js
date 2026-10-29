@@ -1,10 +1,10 @@
 // Library UI with image cards and single-chart loading. Codex, 2026-10-27. AGPL-3.0.
-import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=669908800f8c5daa';
-import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=669908800f8c5daa';
-import {chartSvg} from './lib/render.js?v=669908800f8c5daa';
-import {codeInk} from './lib/chart.js?v=669908800f8c5daa';
-import {patternLink} from './lib/seo.js?v=669908800f8c5daa';
-import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js?v=669908800f8c5daa';
+import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=0b44566f26038ed7';
+import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=0b44566f26038ed7';
+import {chartSvg} from './lib/render.js?v=0b44566f26038ed7';
+import {codeInk} from './lib/chart.js?v=0b44566f26038ed7';
+import {patternLink} from './lib/seo.js?v=0b44566f26038ed7';
+import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js?v=0b44566f26038ed7';
 const $=s=>document.querySelector(s);
 export function createLibraryView({getPalette,getRevision,onOpen,notify}){
  let entries=[],store=null,page=1,detailSerial=0,openSerial=0,view='',detailId='',phase='loading',category='全部',contentVersion='',publicUpdates=false,checking=false,reviewIds=new Set();
