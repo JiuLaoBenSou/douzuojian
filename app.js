@@ -22,7 +22,7 @@ let renderedGrid=null,renderedOptions='',currentScale=1,wheelFrame=0,pendingZoom
 let worker=null,toastTimer=null,uploadSerial=0,dimensionAnchor='width',drawing=false,lastPoint=null,strokeBefore=null,strokeSaved=false,panOrigin=null;
 function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{$('#toast').hidden=true;},5500);}
 function route(){
- const hash=location.hash.slice(1)||'patterns',view=hash.startsWith('studio')?'studio':hash.startsWith('guides')?'guides':hash.startsWith('library/')?'pattern-detail':hash==='library'?'library':'patterns';
+ const hash=location.hash.slice(1)||document.body.dataset.route||'patterns',view=hash.startsWith('studio')?'studio':hash.startsWith('guides')?'guides':hash.startsWith('library/')?'pattern-detail':hash==='library'?'library':'patterns';
  document.querySelectorAll('[data-view]').forEach(el=>{el.hidden=el.dataset.view!==view;});
  document.querySelectorAll('[data-nav]').forEach(el=>{if(el.dataset.nav===(view==='pattern-detail'?'library':view))el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
  $('#about-panel').hidden=hash!=='about';
