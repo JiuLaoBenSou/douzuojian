@@ -1,2 +1,2 @@
-import { quantize } from './lib/engine.js?v=276e23ae488ae51f';
+import { quantize } from './lib/engine.js?v=669908800f8c5daa';
 self.onmessage=event=>{try{const {image,width,height,palette,mode,maxColors}=event.data;self.postMessage({grid:quantize(image,width,height,palette,mode,maxColors)});}catch(error){self.postMessage({error:error.message||'图片处理失败，请换一张图片重试。'});}};
