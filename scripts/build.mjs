@@ -3,6 +3,7 @@ import {fileURLToPath} from 'node:url';
 import {walk,sourceZip} from './source-zip.mjs';
 import {buildCatalog} from './catalog-build.mjs';
 import {buildSeo} from './seo-build.mjs';
+import {moduleVersion,versionModule,versionHtml} from './cache-assets.mjs';
 import {decodePatternDocument} from '../src/lib/catalog-store.js';
 import {createPaletteRegistry} from '../src/lib/palettes.js';
 const root=new URL('../',import.meta.url),dist=new URL('dist/',root);
@@ -14,6 +15,9 @@ const catalog=await buildCatalog(root,dist,{localPreview:process.argv.includes('
 const palette=createPaletteRegistry(JSON.parse(await readFile(new URL('src/data/upstream-color-mapping.json',root),'utf8'))).get('mard').colors;
 const seo=await buildSeo(root,dist,catalog.index,async p=>decodePatternDocument(JSON.parse(await readFile(new URL(p.data.slice(1),dist),'utf8')),p,palette));files.push(...seo.files.filter(p=>!files.includes(p)));
 console.log('SEO_BUILD pages='+seo.urls.length);
+const appVersion=await moduleVersion(root);
+for(const path of files.filter(p=>p.endsWith('.js')||p.endsWith('.html'))){const content=await readFile(new URL(path,dist),'utf8');await writeFile(new URL(path,dist),path.endsWith('.js')?versionModule(content,appVersion):versionHtml(content,appVersion));}
+console.log('APP_MODULE_VERSION '+appVersion);
 const archive=await sourceZip(root);await writeFile(new URL('source.zip',dist),archive.data);
 await writeFile(new URL('manifest.json',dist),JSON.stringify([...files,'LICENSE','THIRD-PARTY-NOTICES.md','source.zip']));
 console.log(`BUILD_OK ${files.length} app files -> ${fileURLToPath(dist)}`);

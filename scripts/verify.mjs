@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {prepareEntry} from './startup-html.mjs';
+import {moduleVersion,versionModule} from './cache-assets.mjs';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
@@ -22,8 +23,9 @@ console.log('PROVENANCE_OK MARD=291 unique keys; mapping + LICENSE byte-exact');
 const manifest=JSON.parse(await readFile(new URL('dist/manifest.json',root),'utf8'));
 const generated=p=>p==='index.html'||p==='robots.txt'||p==='sitemap.xml'||p==='image-to-beads.html'||/^(patterns|collections|guides)\//.test(p);
 const copied=manifest.filter(p=>!generated(p)&&!p.startsWith('catalog/')&&!['LICENSE','THIRD-PARTY-NOTICES.md','source.zip'].includes(p));
-for(const path of copied)assert.deepEqual(path==='index.html'?Buffer.from(await prepareEntry(root)):await readFile(new URL('src/'+path,root)),await readFile(new URL('dist/'+path,root)));
-const entryHtml=await readFile(new URL('dist/index.html',root),'utf8');assert(entryHtml.includes(await readFile(new URL('src/styles.css',root),'utf8')));assert(entryHtml.includes('rel="canonical"'));
+const appVersion=await moduleVersion(root);
+for(const path of copied){const original=await readFile(new URL('src/'+path,root));const expected=path.endsWith('.js')?Buffer.from(versionModule(original.toString('utf8'),appVersion)):original;assert.deepEqual(expected,await readFile(new URL('dist/'+path,root)));}
+const entryHtml=await readFile(new URL('dist/index.html',root),'utf8');assert(entryHtml.includes(await readFile(new URL('src/styles.css',root),'utf8')));assert(entryHtml.includes('rel="canonical"'));assert(entryHtml.includes('/app.js?v='+appVersion));
 console.log('DIST_MATCH '+copied.length+'/'+copied.length+' source app files');
 const catalog=validateCatalogIndex(JSON.parse(await readFile(new URL('dist/catalog/index.json',root),'utf8'))),originals=createCatalog(patterns,palette);
 for(const p of catalog.entries){

@@ -15,7 +15,7 @@
     "preview": "node scripts/serve.mjs --dist",
     "release": "node scripts/prepare-release.mjs",
     "verify": "node scripts/verify.mjs",
-    "test": "node --test tests/engine.test.mjs tests/local-review.test.mjs tests/publication.test.mjs tests/ads.test.mjs tests/startup.test.mjs tests/seo.test.mjs tests/catalog-navigation.test.mjs"
+    "test": "node --test tests/engine.test.mjs tests/local-review.test.mjs tests/publication.test.mjs tests/ads.test.mjs tests/startup.test.mjs tests/seo.test.mjs tests/catalog-navigation.test.mjs tests/cache-assets.test.mjs"
   },
   "engines": {
     "node": ">=22.18"
