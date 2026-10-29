@@ -57,3 +57,16 @@ test('live HTML verification accepts only the exact known Cloudflare injection a
  assert.equal(liveChecks.liveFileMatch('index.html',original,Buffer.from(live.toString().replace("a.height=1","a.height=2"))),null);
  assert.equal(liveChecks.liveFileMatch('app.js',original,live),null);
 });
+
+
+test('new Hoenn and Sinnoh charts disclose appearance-based AI conversion instead of claiming printed-code transcription',async t=>{
+ const root=await mkdtemp(join(tmpdir(),'douzuojian-visual-generations-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const put=async(p,v)=>{await mkdir(join(root,p,'..'),{recursive:true});await writeFile(join(root,p),JSON.stringify(v));};
+ await put('src/data/upstream-color-mapping.json',JSON.parse(await readFile(new URL('../src/data/upstream-color-mapping.json',import.meta.url),'utf8')));
+ const collections=['pokemon-hoenn-135','pokemon-sinnoh-107','pokemon-sinnoh-forms'];
+ const entries=collections.map((collectionId,i)=>({id:'visual-'+i,name:'测试图纸',category:'动漫游戏',series:'宝可梦',section:'图鉴',collection:collectionId,collectionId,author:'作者待核对',source:{label:'用户提供的图纸'},license:'仅本地',palette:'MARD',status:'draft',width:2,height:2,total:2,colorCount:1,unknownCount:0,data:'/catalog/charts/visual-'+i+'.json',thumbnail:'/catalog/thumbs/visual-'+i+'.png'}));
+ await put('.local-catalog/index.json',{schema:1,localPreview:true,entries});
+ for(const p of entries)await put(p.data.replace('/catalog/','.local-catalog/catalog/'),{schema:1,id:p.id,width:2,height:2,colorCodes:['H01'],encoding:'flat',cells:[0,null,null,0]});
+ await publication.preparePublicCatalog({root});const out=JSON.parse(await readFile(join(root,'catalog-content/index.json'),'utf8'));
+ assert.equal(out.entries.length,3);assert(out.entries.every(p=>p.note.includes('按原图配色经 AI 辅助转译')));
+});
