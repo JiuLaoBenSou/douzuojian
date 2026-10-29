@@ -1,10 +1,10 @@
 // Library UI with image cards and single-chart loading. Codex, 2026-10-27. AGPL-3.0.
-import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js';
-import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js';
-import {chartSvg} from './lib/render.js';
-import {codeInk} from './lib/chart.js';
-import {patternLink} from './lib/seo.js';
-import {browseCatalog} from './lib/catalog-navigation.js';
+import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=276e23ae488ae51f';
+import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=276e23ae488ae51f';
+import {chartSvg} from './lib/render.js?v=276e23ae488ae51f';
+import {codeInk} from './lib/chart.js?v=276e23ae488ae51f';
+import {patternLink} from './lib/seo.js?v=276e23ae488ae51f';
+import {browseCatalog} from './lib/catalog-navigation.js?v=276e23ae488ae51f';
 const $=s=>document.querySelector(s);
 export function createLibraryView({getPalette,getRevision,onOpen,notify}){
  let entries=[],store=null,page=1,detailSerial=0,openSerial=0,view='',detailId='',phase='loading',category='全部',contentVersion='',publicUpdates=false,checking=false,reviewIds=new Set();
