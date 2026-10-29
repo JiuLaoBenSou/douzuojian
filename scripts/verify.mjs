@@ -20,8 +20,10 @@ assert.deepEqual(await readFile(new URL('src/data/upstream-color-mapping.json',r
 assert.deepEqual(await readFile(new URL('LICENSE',root)),await readFile(new URL('upstream/Zippland-perler-beads/LICENSE',root)));
 console.log('PROVENANCE_OK MARD=291 unique keys; mapping + LICENSE byte-exact');
 const manifest=JSON.parse(await readFile(new URL('dist/manifest.json',root),'utf8'));
-const copied=manifest.filter(p=>!p.startsWith('catalog/')&&!['LICENSE','THIRD-PARTY-NOTICES.md','source.zip'].includes(p));
+const generated=p=>p==='index.html'||p==='robots.txt'||p==='sitemap.xml'||p==='image-to-beads.html'||/^(patterns|collections|guides)\//.test(p);
+const copied=manifest.filter(p=>!generated(p)&&!p.startsWith('catalog/')&&!['LICENSE','THIRD-PARTY-NOTICES.md','source.zip'].includes(p));
 for(const path of copied)assert.deepEqual(path==='index.html'?Buffer.from(await prepareEntry(root)):await readFile(new URL('src/'+path,root)),await readFile(new URL('dist/'+path,root)));
+const entryHtml=await readFile(new URL('dist/index.html',root),'utf8');assert(entryHtml.includes(await readFile(new URL('src/styles.css',root),'utf8')));assert(entryHtml.includes('rel="canonical"'));
 console.log('DIST_MATCH '+copied.length+'/'+copied.length+' source app files');
 const catalog=validateCatalogIndex(JSON.parse(await readFile(new URL('dist/catalog/index.json',root),'utf8'))),originals=createCatalog(patterns,palette);
 for(const p of catalog.entries){

@@ -27,10 +27,10 @@ await writeFile(new URL('_headers',release),`/*
   Content-Type: application/zip
   Content-Disposition: attachment; filename="douzuojian-source.zip"
 `);
-await writeFile(new URL('robots.txt',release),'User-agent: *\nAllow: /\nSitemap: '+SITE_URL+'sitemap.xml\n');
-await writeFile(new URL('sitemap.xml',release),'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>'+SITE_URL+'</loc></url></urlset>');
-await writeFile(new URL('404.html',release),'<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>找不到页面｜豆作间</title><link rel="stylesheet" href="/styles.css"><main class="page-shell"><h1>找不到这个页面</h1><p><a href="/">返回豆作间</a></p></main></html>');
-const files=[...allowed,'_headers','robots.txt','sitemap.xml','404.html'];
+if(!allowed.includes('robots.txt'))await writeFile(new URL('robots.txt',release),'User-agent: *\nAllow: /\nSitemap: '+SITE_URL+'sitemap.xml\n');
+if(!allowed.includes('sitemap.xml'))await writeFile(new URL('sitemap.xml',release),'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>'+SITE_URL+'</loc></url></urlset>');
+await writeFile(new URL('404.html',release),'<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>找不到页面｜豆作间</title><meta name="robots" content="noindex,follow"><link rel="stylesheet" href="/styles.css"><main class="page-shell"><h1>找不到这个页面</h1><p><a href="/">返回豆作间</a></p></main></html>');
+const files=[...new Set([...allowed,'_headers','robots.txt','sitemap.xml','404.html'])];
 const fingerprints=[];
 for(const path of files){const bytes=await readFile(new URL(path,release));if((await stat(new URL(path,release))).size>25*1024*1024)throw new Error('Asset too large');fingerprints.push({path,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});}
 await writeFile(new URL('releases/'+version+'-manifest.json',root),JSON.stringify(fingerprints,null,2));

@@ -1,15 +1,19 @@
-import {mkdir,copyFile,writeFile} from 'node:fs/promises';
+import {mkdir,copyFile,writeFile,readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {walk,sourceZip} from './source-zip.mjs';
 import {buildCatalog} from './catalog-build.mjs';
-import {prepareEntry} from './startup-html.mjs';
+import {buildSeo} from './seo-build.mjs';
+import {decodePatternDocument} from '../src/lib/catalog-store.js';
+import {createPaletteRegistry} from '../src/lib/palettes.js';
 const root=new URL('../',import.meta.url),dist=new URL('dist/',root);
 const files=(await walk(new URL('src/',root))).filter(p=>p!=='patterns.js');
 await mkdir(dist,{recursive:true});
 for(const path of files){await mkdir(new URL(path.includes('/')?path.slice(0,path.lastIndexOf('/')+1):'./',dist),{recursive:true});await copyFile(new URL('src/'+path,root),new URL(path,dist));}
-await writeFile(new URL('index.html',dist),await prepareEntry(root));
 for(const path of ['LICENSE','THIRD-PARTY-NOTICES.md'])await copyFile(new URL(path,root),new URL(path,dist));
 const catalog=await buildCatalog(root,dist,{localPreview:process.argv.includes('--local-catalog')});files.push(...catalog.files);
+const palette=createPaletteRegistry(JSON.parse(await readFile(new URL('src/data/upstream-color-mapping.json',root),'utf8'))).get('mard').colors;
+const seo=await buildSeo(root,dist,catalog.index,async p=>decodePatternDocument(JSON.parse(await readFile(new URL(p.data.slice(1),dist),'utf8')),p,palette));files.push(...seo.files.filter(p=>!files.includes(p)));
+console.log('SEO_BUILD pages='+seo.urls.length);
 const archive=await sourceZip(root);await writeFile(new URL('source.zip',dist),archive.data);
 await writeFile(new URL('manifest.json',dist),JSON.stringify([...files,'LICENSE','THIRD-PARTY-NOTICES.md','source.zip']));
 console.log(`BUILD_OK ${files.length} app files -> ${fileURLToPath(dist)}`);
