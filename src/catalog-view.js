@@ -4,13 +4,12 @@ import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog
 import {chartSvg} from './lib/render.js';
 import {codeInk} from './lib/chart.js';
 import {patternLink} from './lib/seo.js';
-import {browseCatalog} from './lib/catalog-navigation.js';
+import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js';
 const $=s=>document.querySelector(s);
 export function createLibraryView({getPalette,getRevision,onOpen,notify}){
  let entries=[],store=null,page=1,detailSerial=0,openSerial=0,view='',detailId='',phase='loading',category='全部',contentVersion='',publicUpdates=false,checking=false,reviewIds=new Set();
  let thisCollectionApplied=false,publicPages=false;
  let folderPath=[],folderLabels=[],showAll=false;
- const folderArt=p=>p.collectionId==='pokemon-johto-100'?'/assets/johto-title.webp':p.series==='宝可梦'?'/assets/kanto-title.webp':null;
  function navigate(path,labels){folderPath=path;folderLabels=labels;showAll=false;page=1;$('#pattern-search').value='';for(const id of ['catalog-series','catalog-section','catalog-collection','catalog-size','catalog-colors'])$('#'+id).value='all';refinements();list();}
  function folders(state,filtering){
   const root=$('#catalog-folders'),crumb=$('#catalog-folder-path');
@@ -18,7 +17,11 @@ export function createLibraryView({getPalette,getRevision,onOpen,notify}){
   crumb.querySelectorAll('[data-depth]').forEach(b=>b.addEventListener('click',()=>navigate(folderPath.slice(0,+b.dataset.depth),folderLabels.slice(0,+b.dataset.depth))));
   const browsing=!filtering&&!state.leaf;root.hidden=!browsing;$('#pattern-list').hidden=browsing;$('#catalog-pagination').hidden=browsing;
   if(!browsing){root.innerHTML='';return false;}
-  root.innerHTML=state.groups.map((g,i)=>{const art=state.level===2?folderArt(g.sample):null,label=g.label;return '<button class="collection-door" data-folder="'+i+'"><span class="collection-cover '+(art?'':'geometric-cover')+'">'+(art?'<img src="'+art+'" alt="" width="768" height="512" decoding="async">':'<span class="folder-wordmark" aria-hidden="true">'+esc(label)+'</span><span class="folder-pixel-row" aria-hidden="true">▪ ▪ ▪ ▪ ▪</span>')+(state.level<2?'<span class="cover-caption">'+esc(label)+'</span>':'')+'</span><span class="collection-door-info"><span><strong>'+esc(label)+'</strong><small>'+g.count+' 张图纸</small></span><span class="door-arrow" aria-hidden="true">→</span></span></button>';}).join('');
+  root.innerHTML=state.groups.map((g,i)=>{
+   const samples=folderPreviews(entries,folderPath,g.value),label=g.label;
+   const tone=(folderPath[0]||g.sample.series)==='三丽鸥'?'pink':(folderPath[0]||g.sample.series)==='原创几何'?'mint':'sky';
+   return '<button class="collection-door" data-folder="'+i+'" aria-label="'+esc(label)+'，'+g.count+' 张图纸"><span class="collection-cover category-'+tone+'" aria-hidden="true">'+samples.map((p,j)=>'<img class="category-preview preview-'+j+'" src="'+esc(p.thumbnail)+(contentVersion?'?v='+encodeURIComponent(contentVersion):'')+'" alt="" width="160" height="160" decoding="async">').join('')+'</span><span class="collection-door-info"><span><strong>'+esc(label)+'</strong><small>'+g.count+' 张图纸</small></span><span class="door-arrow" aria-hidden="true">→</span></span></button>';
+  }).join('');
   root.querySelectorAll('[data-folder]').forEach(b=>b.addEventListener('click',()=>{const g=state.groups[+b.dataset.folder];navigate([...folderPath,g.value],[...folderLabels,g.label]);}));
   $('#catalog-results').textContent=state.groups.length+' 个分类 · '+state.entries.length+' 张图纸';$('#library-title').textContent=folderLabels.at(-1)||'选个分类，开始找图';return true;
  }
