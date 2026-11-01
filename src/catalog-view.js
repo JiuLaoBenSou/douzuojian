@@ -4,6 +4,7 @@ import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog
 import {chartSvg} from './lib/render.js';
 import {codeInk} from './lib/chart.js';
 import {patternLink} from './lib/seo.js';
+import {featuredPatterns} from './lib/featured.js';
 import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js';
 const $=s=>document.querySelector(s);
 export function createLibraryView({getPalette,getRevision,onOpen,notify}){
@@ -72,7 +73,7 @@ export function createLibraryView({getPalette,getRevision,onOpen,notify}){
    $('#catalog-review-entry').hidden=!reviewIds.size;
    $('#catalog-local-note').hidden=!index.localPreview;$('#catalog-local-note').textContent=index.localPreview?'本地预览：含 '+entries.filter(p=>p.status==='draft').length+' 张数据化草稿，色号与来源仍待核对。':'';
    refinements();
-   categories();if(document.body.dataset.collection&&!thisCollectionApplied){$('#catalog-collection').value=document.body.dataset.collection;thisCollectionApplied=true;}list();$('#featured-patterns').innerHTML=entries.filter(p=>p.status==='ready').slice(0,3).map(card).join('');bind($('#featured-patterns'));if(view==='pattern-detail')detail(detailId);
+   categories();if(document.body.dataset.collection&&!thisCollectionApplied){$('#catalog-collection').value=document.body.dataset.collection;thisCollectionApplied=true;}list();$('#featured-patterns').innerHTML=featuredPatterns(entries).map(card).join('');bind($('#featured-patterns'));if(view==='pattern-detail')detail(detailId);
   }catch{phase='error';$('#pattern-list').innerHTML='<div class="catalog-empty"><p>图纸目录没有加载成功。</p><button class="small-button" id="retry-catalog">重新读取</button></div>';$('#retry-catalog').addEventListener('click',()=>init());if(view==='pattern-detail')detail(detailId);notify('图纸目录暂时无法读取，其他编辑功能仍可使用。');}
  }
  async function checkUpdates(){if(checking||!publicUpdates||document.hidden||!['library','pattern-detail'].includes(view))return;checking=true;try{const next=validateCatalogIndex(await fetchJson('/catalog/index.json'));if(next.contentVersion&&next.contentVersion!==contentVersion)await init(next);}catch{}finally{checking=false;}}
