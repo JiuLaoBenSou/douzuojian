@@ -1,10 +1,11 @@
 // Library UI with image cards and single-chart loading. Codex, 2026-10-27. AGPL-3.0.
-import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=9b7a539ecbc06bda';
-import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=9b7a539ecbc06bda';
-import {chartSvg} from './lib/render.js?v=9b7a539ecbc06bda';
-import {codeInk} from './lib/chart.js?v=9b7a539ecbc06bda';
-import {patternLink} from './lib/seo.js?v=9b7a539ecbc06bda';
-import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js?v=9b7a539ecbc06bda';
+import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=4ad5c469908a465a';
+import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=4ad5c469908a465a';
+import {chartSvg} from './lib/render.js?v=4ad5c469908a465a';
+import {codeInk} from './lib/chart.js?v=4ad5c469908a465a';
+import {patternLink} from './lib/seo.js?v=4ad5c469908a465a';
+import {featuredPatterns} from './lib/featured.js?v=4ad5c469908a465a';
+import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js?v=4ad5c469908a465a';
 const $=s=>document.querySelector(s);
 export function createLibraryView({getPalette,getRevision,onOpen,notify}){
  let entries=[],store=null,page=1,detailSerial=0,openSerial=0,view='',detailId='',phase='loading',category='全部',contentVersion='',publicUpdates=false,checking=false,reviewIds=new Set();
@@ -72,7 +73,7 @@ export function createLibraryView({getPalette,getRevision,onOpen,notify}){
    $('#catalog-review-entry').hidden=!reviewIds.size;
    $('#catalog-local-note').hidden=!index.localPreview;$('#catalog-local-note').textContent=index.localPreview?'本地预览：含 '+entries.filter(p=>p.status==='draft').length+' 张数据化草稿，色号与来源仍待核对。':'';
    refinements();
-   categories();if(document.body.dataset.collection&&!thisCollectionApplied){$('#catalog-collection').value=document.body.dataset.collection;thisCollectionApplied=true;}list();$('#featured-patterns').innerHTML=entries.filter(p=>p.status==='ready').slice(0,3).map(card).join('');bind($('#featured-patterns'));if(view==='pattern-detail')detail(detailId);
+   categories();if(document.body.dataset.collection&&!thisCollectionApplied){$('#catalog-collection').value=document.body.dataset.collection;thisCollectionApplied=true;}list();$('#featured-patterns').innerHTML=featuredPatterns(entries).map(card).join('');bind($('#featured-patterns'));if(view==='pattern-detail')detail(detailId);
   }catch{phase='error';$('#pattern-list').innerHTML='<div class="catalog-empty"><p>图纸目录没有加载成功。</p><button class="small-button" id="retry-catalog">重新读取</button></div>';$('#retry-catalog').addEventListener('click',()=>init());if(view==='pattern-detail')detail(detailId);notify('图纸目录暂时无法读取，其他编辑功能仍可使用。');}
  }
  async function checkUpdates(){if(checking||!publicUpdates||document.hidden||!['library','pattern-detail'].includes(view))return;checking=true;try{const next=validateCatalogIndex(await fetchJson('/catalog/index.json'));if(next.contentVersion&&next.contentVersion!==contentVersion)await init(next);}catch{}finally{checking=false;}}

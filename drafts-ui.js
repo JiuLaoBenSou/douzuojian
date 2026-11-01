@@ -1,4 +1,4 @@
-import {createDraftStore} from './lib/drafts.js?v=9b7a539ecbc06bda';
+import {createDraftStore} from './lib/drafts.js?v=4ad5c469908a465a';
 export function createDraftPanel({capture,restore,canSave}){
  const root=document.getElementById('device-drafts'),status=document.getElementById('draft-status'),list=document.getElementById('draft-list'),selector=document.getElementById('draft-select'),confirm=document.getElementById('draft-confirm'),store=createDraftStore();
  let ready=false,paused=false,active=null,timer=null,pending=null,chain=Promise.resolve(),baseline='',rows=[],confirmTarget=null;

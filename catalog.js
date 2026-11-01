@@ -1,7 +1,7 @@
 // Curated chart catalog and validation by Codex, 2026-10-26. AGPL-3.0.
-import {patternGrid} from './library.js?v=9b7a539ecbc06bda';
-import {summarize} from './lib/engine.js?v=9b7a539ecbc06bda';
-import {findPaletteColor} from './lib/palettes.js?v=9b7a539ecbc06bda';
+import {patternGrid} from './library.js?v=4ad5c469908a465a';
+import {summarize} from './lib/engine.js?v=4ad5c469908a465a';
+import {findPaletteColor} from './lib/palettes.js?v=4ad5c469908a465a';
 export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createCatalog(patterns,palette){
  const ids=new Set();
