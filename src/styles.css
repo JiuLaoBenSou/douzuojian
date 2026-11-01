@@ -115,3 +115,5 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;pa
 .catalog-directory>nav>a:hover{border-color:#5588a5;background:#eaf6ff}
 @media(max-width:540px){.catalog-directory{margin:16px 0 0}.catalog-directory>nav{grid-template-columns:minmax(0,1fr)}.header-action{gap:6px}}
 /* CATALOG_LAYOUT_END */
+
+.device-drafts{padding:16px 20px;margin-bottom:24px;background:#f7fcff}.draft-heading,.draft-list{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.draft-heading strong{font-size:15px}.draft-heading>[role=status]{font-size:12px;flex:1;min-width:180px}.draft-list{margin-top:14px}.draft-list label{font-size:12px}.draft-list select{padding:7px;min-width:0;flex:1;max-width:100%;background:#fff}.draft-note{font-size:11px;color:var(--muted);margin-top:12px}.draft-confirm{padding:12px;margin-top:12px;border:1px solid var(--line);background:#fff8df}.draft-confirm p{margin-bottom:9px;font-size:12px}.draft-confirm button{margin-right:8px}@media(max-width:600px){.device-drafts{padding:14px}.draft-heading>[role=status]{flex-basis:100%;order:2}.draft-list select{flex-basis:100%}.draft-list .small-button{font-size:11px}}
