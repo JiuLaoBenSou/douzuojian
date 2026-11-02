@@ -19,5 +19,5 @@ export async function exportPng(grid,name,options={}){
  ctx.fillText('有色号的白格放白豆；无色号的白格不放豆。屏幕配色仅供参考，非 1:1 校准打印图。',pad,canvas.height-38);
  ctx.font=font(11);ctx.fillText('基于 Zippland / Perler Beads Generator · AGPL-3.0 · 源码见豆作间页脚',pad,canvas.height-17);
  const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('浏览器未能生成 PNG')),'image/png'));
- downloadBlob(blob,`豆作间-${name}-图纸.png`);return {width:canvas.width,height:canvas.height,bytes:blob.size};
+ const filename=`豆作间-${name}-图纸.png`;if(options.download!==false)downloadBlob(blob,filename);return {width:canvas.width,height:canvas.height,bytes:blob.size,blob,filename};
 }
