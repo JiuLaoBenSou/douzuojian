@@ -1,11 +1,11 @@
 // Library UI with image cards and single-chart loading. Codex, 2026-10-27. AGPL-3.0.
-import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=4ad5c469908a465a';
-import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=4ad5c469908a465a';
-import {chartSvg} from './lib/render.js?v=4ad5c469908a465a';
-import {codeInk} from './lib/chart.js?v=4ad5c469908a465a';
-import {patternLink} from './lib/seo.js?v=4ad5c469908a465a';
-import {featuredPatterns} from './lib/featured.js?v=4ad5c469908a465a';
-import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js?v=4ad5c469908a465a';
+import {filterPatterns,classifyCatalogEntry,catalogFacets,escapeHtml as esc} from './catalog.js?v=f3291c3218380e52';
+import {validateCatalogIndex,createPatternStore,catalogPage} from './lib/catalog-store.js?v=f3291c3218380e52';
+import {chartSvg} from './lib/render.js?v=f3291c3218380e52';
+import {codeInk} from './lib/chart.js?v=f3291c3218380e52';
+import {patternLink} from './lib/seo.js?v=f3291c3218380e52';
+import {featuredPatterns} from './lib/featured.js?v=f3291c3218380e52';
+import {browseCatalog,folderPreviews} from './lib/catalog-navigation.js?v=f3291c3218380e52';
 const $=s=>document.querySelector(s);
 export function createLibraryView({getPalette,getRevision,onOpen,notify}){
  let entries=[],store=null,page=1,detailSerial=0,openSerial=0,view='',detailId='',phase='loading',category='全部',contentVersion='',publicUpdates=false,checking=false,reviewIds=new Set();
