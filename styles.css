@@ -29,8 +29,8 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;pa
 
 /* Catalog and vector reader, Codex 2026-10-26. Sky palette follows the user's choice. */
 #pattern-canvas{display:block;flex:none;max-width:none;image-rendering:auto;user-select:none;touch-action:none}#pattern-canvas text{font-family:Consolas,Arial,sans-serif;font-weight:500;user-select:none}
-.pattern-card{flex-direction:column;align-items:stretch}.pattern-card .thumbnail{width:100%;max-width:none;height:180px;aspect-ratio:auto}.pattern-card .pattern-info{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-width:0}.pattern-card .pattern-info p{white-space:normal;overflow-wrap:anywhere;line-height:1.8}.pattern-card .pattern-info .pattern-actions{width:100%}.pattern-card .pattern-actions .small-button{text-decoration:none;font-size:11px;padding:8px}.pattern-card .pattern-actions .button{width:auto}#featured-patterns{grid-template-columns:repeat(3,minmax(0,1fr))}
-@media(max-width:800px){#featured-patterns{grid-template-columns:repeat(2,minmax(0,1fr))}.pattern-card .thumbnail{height:150px}.pattern-card .pattern-actions{gap:8px}}
+.pattern-card{flex-direction:column;align-items:stretch}.pattern-card .thumbnail{width:100%;max-width:none;height:180px;aspect-ratio:auto}.pattern-card .pattern-info{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-width:0}.pattern-card .pattern-info p{white-space:normal;overflow-wrap:anywhere;line-height:1.8}.pattern-card .pattern-info .pattern-actions{width:100%}.pattern-card .pattern-actions .small-button{text-decoration:none;font-size:11px;padding:8px}.pattern-card .pattern-actions .button{width:auto}
+@media(max-width:800px){.pattern-card .thumbnail{height:150px}.pattern-card .pattern-actions{gap:8px}}
 @media(max-width:540px){.pattern-card .thumbnail{height:120px}.pattern-card .pattern-actions .small-button,.pattern-card .pattern-actions .button{font-size:10px;padding:7px}}
 .catalog-refinements{display:flex;gap:16px;align-items:end;flex-wrap:wrap;padding:0 24px 18px}.catalog-refinements label{display:grid;gap:8px;font-size:12px}.catalog-refinements select{padding:9px;font-size:12px;background:white}.catalog-results{padding:0 24px 18px;font-size:12px;color:var(--muted)}.pattern-card .pattern-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}.pattern-card .pattern-actions .button{margin:0}.pattern-card .pattern-credit{font-size:10px;line-height:1.8}.pattern-card .pattern-tags{font-size:10px;color:var(--muted)}.catalog-empty{grid-column:1/-1;padding:32px;text-align:center;line-height:2}.catalog-empty button{margin-top:16px}.catalog-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.8fr);gap:28px;padding:28px}.catalog-detail-preview{min-width:0;background:white;border:2px solid var(--ink);padding:14px}.catalog-detail-preview>svg{width:100%;display:block;max-height:560px}.catalog-detail-info h2{font-size:24px;margin-bottom:14px}.catalog-detail-info>p{line-height:1.9;margin-bottom:18px;font-size:13px}.catalog-facts{display:grid;grid-template-columns:90px 1fr;gap:12px;font-size:12px;line-height:1.8}.catalog-facts dt{color:var(--muted)}.catalog-facts dd{margin:0;overflow-wrap:anywhere}.catalog-detail-info>.button{margin:24px 0 16px}.catalog-detail-info .chart-legend{border:0;padding:0;max-height:none;background:transparent}.board-auto{margin-top:15px!important}
 @media(max-width:800px){.catalog-detail{grid-template-columns:1fr;padding:18px}.catalog-refinements{padding:0 16px 18px;gap:12px}.catalog-refinements label{flex:1;min-width:145px}.catalog-refinements select{width:100%;min-width:0}.catalog-results{padding-left:16px}.main-nav{flex-wrap:wrap}.catalog-detail-info h2{font-size:21px}}
@@ -147,6 +147,49 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;pa
  .catalog-filter-group label:last-child { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) { .collection-door { transition: none; } }
+
+.featured-heading {
+ display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap;
+ gap: 10px 16px; margin-bottom: 17px;
+}
+.featured-heading h2 { font-size: clamp(22px, 2.8vw, 29px); }
+.featured-heading > a { font-size: 12px; color: #25658d; }
+.featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+.featured-card {
+ display: flex; flex-direction: column; min-width: 0; padding: 9px;
+ border: 1px solid #7c9db2; background: #fffefa; box-shadow: 2px 3px 0 #d8e7ef;
+}
+.featured-cover {
+ display: block; flex: none; aspect-ratio: 16 / 9; min-height: 110px;
+ transition: box-shadow .15s;
+}
+.featured-cover::before {
+ inset: auto; top: 50%; left: 50%; width: auto; height: 79%; aspect-ratio: 1;
+ transform: translate(-50%, -50%) rotate(-9deg);
+}
+.featured-cover .category-preview { inset: 5% 9%; width: 82%; height: 90%; }
+.featured-cover:hover { box-shadow: inset 0 0 0 2px var(--cover-edge); }
+.featured-info {
+ display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 6px; padding: 12px 4px 3px;
+}
+.featured-info h3 { font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+.featured-taxonomy, .featured-specs { font-size: 11px; line-height: 1.6; color: var(--muted); }
+.featured-specs { font-variant-numeric: tabular-nums; }
+.featured-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin-top: auto; padding-top: 8px; }
+.featured-actions .button { min-height: 36px; padding: 7px 10px; font-size: 12px; white-space: nowrap; }
+.featured-actions .text-link { padding-block: 6px; font-size: 12px; white-space: nowrap; }
+@media (max-width: 600px) {
+ .featured-grid { grid-template-columns: minmax(0,1fr); gap: 12px; }
+ .featured-card {
+  display: grid; grid-template-columns: minmax(86px,36%) minmax(0,1fr); align-items: center;
+  gap: 10px; padding: 8px;
+ }
+ .featured-cover { aspect-ratio: 1; min-height: 0; }
+ .featured-info { gap: 3px; padding: 2px; }
+ .featured-info h3 { font-size: 14px; }
+ .featured-actions { gap: 4px 10px; padding-top: 5px; }
+ .featured-actions .button { min-height: 34px; padding: 5px 8px; }
+}
 
 /* CATALOG_LAYOUT_START: keep the static collection index out of the title row. */
 .page-heading>div{flex:1;min-width:0}
