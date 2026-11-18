@@ -2,9 +2,11 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {prepareEntry} from './startup-html.mjs';
 import {guides} from '../src/guides.js';
-import {escapeHtml as esc} from '../src/catalog.js';
+import {classifyCatalogEntry,escapeHtml as esc} from '../src/catalog.js';
 import {patternPage} from '../src/lib/seo.js';
 import {featuredPatterns} from '../src/lib/featured.js';
+import {browseCatalog,catalogLabels} from '../src/lib/catalog-navigation.js';
+import {renderFolderCards} from '../src/lib/catalog-cards.js';
 import {chartSvg} from '../src/lib/render.js';
 import {codeInk} from '../src/lib/chart.js';
 const SITE='https://douzuojian.com';
@@ -33,12 +35,25 @@ export async function buildSeo(root,out,index,load){
  const home=shared.replace(/(<div[^>]*id="featured-patterns"[^>]*>)[\s\S]*?<\/div>/,(_,tag)=>tag+featuredPatterns(entries).map(card).join('')+'</div>').replace('<!-- collection-shortcuts -->',collectionDoors.length?`<nav class="collection-shortcuts" aria-label="按题材找拼豆图纸"><span>按题材找图</span>${collectionDoors.map(([id,label])=>`<a href="/collections/${id}.html">${esc(label)} →</a>`).join('')}</nav>`:'');
  await page('index.html',home,{title:'豆作间｜拼豆图纸库与图片转拼豆工具',description:'免费在线拼豆工具：按角色和合集找图纸，上传图片转拼豆，查看 MARD 291 色参考色号与用豆量。支持改色、镜像、品牌换号，导出 PNG 图纸与 CSV 用量表。',schema:{name:'豆作间',alternateName:'豆作间拼豆'}});
  async function listing(path,title,rows,collection=''){
-  let html=view(shared,'library',collection).replace(/(<div[^>]*id="pattern-list"[^>]*>)[\s\S]*?<\/div>/,(_,tag)=>tag+rows.map(card).join('')+'</div>');
-  const directory=[...new Map(entries.filter(p=>p.collectionId&&/^[a-z0-9-]+$/.test(p.collectionId)).map(p=>[p.collectionId,p.collection])).entries()].map(([id,label])=>`<a class="text-link" href="/collections/${id}.html">${esc(label)}</a>`).join('');
-  const series=rows[0]?.series,label=collection&&series&&!title.includes(series)?series+' · '+title:title;
+  let html=view(shared,'library',collection);
+  const chartList=/<div id="pattern-list" class="pattern-list"[^>]*>[\s\S]*?<\/div>/;
+  if(collection){
+   html=html.replace(chartList,()=>`<div id="pattern-list" class="pattern-list" aria-live="polite">${rows.map(card).join('')}</div>`);
+  }else{
+   const state=browseCatalog(rows.map(classifyCatalogEntry));
+   html=html.replace(chartList,'<div id="pattern-list" class="pattern-list" aria-live="polite" hidden></div>')
+    .replace('<div id="catalog-folders" class="catalog-folders"></div>',()=>`<div id="catalog-folders" class="catalog-folders">${renderFolderCards(state,[],index.contentVersion)}</div>`)
+    .replace('<nav id="catalog-folder-path" class="catalog-folder-path" aria-label="图纸分类路径"></nav>','<nav id="catalog-folder-path" class="catalog-folder-path" aria-label="图纸分类路径"><span aria-current="page">全部图纸</span></nav>')
+    .replace('<p id="catalog-results" class="catalog-results" role="status"></p>',`<p id="catalog-results" class="catalog-results" role="status">${state.groups.length} 个分类 · ${rows.length} 张图纸</p>`);
+   if(index.publicTranscribed)html=html.replace('id="catalog-public-note" class="catalog-public-note" hidden','id="catalog-public-note" class="catalog-public-note"');
+  }
+  const links=new Map(entries.map(p=>p.collectionId&&/^[a-z0-9-]+$/.test(p.collectionId)
+   ? ['/collections/'+p.collectionId+'.html',p.collection] : [patternPage(p.id),p.name]));
+  const directory=[...links].map(([href,label])=>`<a class="text-link" href="${href}">${esc(label)}</a>`).join('');
+  const series=rows[0]?.series?catalogLabels(rows[0])[0]:'',label=collection&&series&&!title.includes(series)?series+' · '+title:title;
   const heading=collection&&!label.includes('拼豆图纸')?label+'拼豆图纸':label;
   const intro=collection?`${label}，共 ${rows.length} 张。每张都列出尺寸、颜色数、MARD 色号与用豆量；可打开工坊改色、镜像，导出图纸和备料清单。`:'按角色、系列和造型找拼豆图纸。先看尺寸、颜色数和用豆量，再打开工坊修改或下载。';
-  html=html.replace('<h2 id="library-title">全部图纸</h2>',`<h2 id="library-title">${esc(title)}</h2>`).replace('<h1 id="catalog-title">拼豆图纸库</h1>',`<h1 id="catalog-title">${esc(heading)}</h1>`).replace(/(<p id="catalog-intro">)[\s\S]*?<\/p>/,(_,tag)=>tag+esc(intro)+'</p>');
+  html=html.replace('<h2 id="library-title" tabindex="-1">全部图纸</h2>',`<h2 id="library-title" tabindex="-1">${collection?esc(title):'按分类找图'}</h2>`).replace('<h1 id="catalog-title">拼豆图纸库</h1>',`<h1 id="catalog-title">${esc(heading)}</h1>`).replace(/(<p id="catalog-intro">)[\s\S]*?<\/p>/,(_,tag)=>tag+esc(intro)+'</p>');
   if(directory)html=html.replace('<nav id="catalog-pagination" class="catalog-pagination" aria-label="图纸分页"></nav>','$&'+`<details class="catalog-directory"><summary>按合集浏览</summary><nav aria-label="图纸合集">${directory}</nav></details>`);
   await page(path,html,{title:heading+'｜豆作间',description:collection?intro:`拼豆图纸库现有 ${rows.length} 张图纸，按系列、角色和合集浏览，可按尺寸、颜色数筛选。查看逐格色号与用豆量，在工坊改色、镜像并导出 PNG 图纸与 CSV 备料清单。`});
  }
@@ -46,8 +61,8 @@ export async function buildSeo(root,out,index,load){
  const collections=[...new Map(entries.filter(p=>p.collectionId&&/^[a-z0-9-]+$/.test(p.collectionId)).map(p=>[p.collectionId,p.collection])).entries()];
  for(const [id,label]of collections)await listing('collections/'+id+'.html',label,entries.filter(p=>p.collectionId===id),id);
  for(const p of entries){
-  const decoded=await load(p),path=patternPage(p.id).slice(1),name=p.series&&!p.name.includes(p.series)?p.series+' · '+p.name:p.name;
-  const body=`<nav aria-label="面包屑"><a href="/">豆作间</a> / <a href="/patterns/index.html">图纸库</a> / ${esc(p.name)}</nav><article class="pixel-frame catalog-detail" data-seo-static><div class="catalog-detail-preview">${chartSvg(decoded.grid)}</div><div class="catalog-detail-info"><h2>逐格色号与用豆清单</h2><p>${esc(p.note||'查看图纸尺寸、色号和用豆量，打开工坊编辑并导出。')}</p><dl class="catalog-facts"><dt>尺寸 / 用量</dt><dd>${p.width} × ${p.height} 格 / ${p.colorCount} 色 / ${p.total} 颗</dd><dt>所属合集</dt><dd>${esc([p.category,p.series,p.section].filter(Boolean).join(' / '))}${p.collectionId&&/^[a-z0-9-]+$/.test(p.collectionId)?` / <a href="/collections/${p.collectionId}.html">${esc(p.collection)}</a>`:esc(p.collection||'')}</dd><dt>作者</dt><dd>${esc(p.author)}</dd><dt>来源</dt><dd>${/^https?:\/\//.test(p.source.url||'')?`<a href="${esc(p.source.url)}" rel="noopener">${esc(p.source.label)}</a>`:esc(p.source.label)}</dd><dt>使用范围</dt><dd>${esc(p.license)}</dd><dt>色板</dt><dd>MARD 参考色板，屏幕颜色请对照实物色卡。</dd></dl>${p.id.startsWith('pokemon-')?'<p class="reference-note">图纸经 AI 辅助转译，可能存在色号或用量误差，请核对原图与实物色卡。</p>':''}<a class="button blue" href="/#library/${p.id}">查看并编辑图纸</a><div class="chart-legend">${decoded.materials.map(c=>`<span class="legend-color"><i style="background:${c.color};color:${codeInk(c.color)}">${esc(c.key)}</i><small>${c.count} 颗</small></span>`).join('')}</div></div></article>`;
+  const decoded=await load(p),path=patternPage(p.id).slice(1),series=catalogLabels(p)[0],name=series&&!p.name.includes(series)?series+' · '+p.name:p.name;
+  const body=`<nav aria-label="面包屑"><a href="/">豆作间</a> / <a href="/patterns/index.html">图纸库</a> / ${esc(p.name)}</nav><article class="pixel-frame catalog-detail" data-seo-static><div class="catalog-detail-preview">${chartSvg(decoded.grid)}</div><div class="catalog-detail-info"><h2>逐格色号与用豆清单</h2><p>${esc(p.note||'查看图纸尺寸、色号和用豆量，打开工坊编辑并导出。')}</p><dl class="catalog-facts"><dt>尺寸 / 用量</dt><dd>${p.width} × ${p.height} 格 / ${p.colorCount} 色 / ${p.total} 颗</dd><dt>所属合集</dt><dd>${esc(catalogLabels(p).slice(0,p.collection?-1:undefined).join(' / '))}${p.collectionId&&/^[a-z0-9-]+$/.test(p.collectionId)?` / <a href="/collections/${p.collectionId}.html">${esc(p.collection)}</a>`:esc(p.collection||'')}</dd><dt>作者</dt><dd>${esc(p.author)}</dd><dt>来源</dt><dd>${/^https?:\/\//.test(p.source.url||'')?`<a href="${esc(p.source.url)}" rel="noopener">${esc(p.source.label)}</a>`:esc(p.source.label)}</dd><dt>使用范围</dt><dd>${esc(p.license)}</dd><dt>色板</dt><dd>MARD 参考色板，屏幕颜色请对照实物色卡。</dd></dl>${p.id.startsWith('pokemon-')?'<p class="reference-note">图纸经 AI 辅助转译，可能存在色号或用量误差，请核对原图与实物色卡。</p>':''}<a class="button blue" href="/#library/${p.id}">查看并编辑图纸</a><div class="chart-legend">${decoded.materials.map(c=>`<span class="legend-color"><i style="background:${c.color};color:${codeInk(c.color)}">${esc(c.key)}</i><small>${c.count} 颗</small></span>`).join('')}</div></div></article>`;
   let html=view(shared,'library/'+p.id).replace('<div id="pattern-detail"></div>',`<div id="pattern-detail">${body}</div>`).replace('<h1 id="detail-title">图纸详情</h1>',`<h1 id="detail-title">${esc(name)}拼豆图纸</h1>`);
   await page(path,html,{title:`${name}拼豆图纸｜${p.width}×${p.height}格·${p.colorCount}色｜豆作间`,description:`${name}拼豆图纸，${p.width}×${p.height}格，${p.colorCount}种颜色，共${p.total}颗。查看 MARD 色号与用量，${p.collection||p.category}，可在工坊改色、镜像，导出 PNG 图纸与 CSV 用量表。`,image:p.thumbnail});
  }
