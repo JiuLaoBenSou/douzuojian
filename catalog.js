@@ -1,7 +1,8 @@
 // Curated chart catalog and validation by Codex, 2026-10-26. AGPL-3.0.
-import {patternGrid} from './library.js?v=f3291c3218380e52';
-import {summarize} from './lib/engine.js?v=f3291c3218380e52';
-import {findPaletteColor} from './lib/palettes.js?v=f3291c3218380e52';
+import {patternGrid} from './library.js?v=357b387ecd51994c';
+import {summarize} from './lib/engine.js?v=357b387ecd51994c';
+import {findPaletteColor} from './lib/palettes.js?v=357b387ecd51994c';
+import {catalogLabels} from './lib/catalog-navigation.js?v=357b387ecd51994c';
 export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createCatalog(patterns,palette){
  const ids=new Set();
@@ -34,7 +35,7 @@ export function catalogFacets(entries,{category='全部',series='all',section='a
 export function filterPatterns(entries,{query='',category='全部',series='all',section='all',collection='all',size='all',colors='all',sort='default'}={}){
  const words=query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
  const found=entries.filter(entry=>{
-  const p=classifyCatalogEntry(entry),text=[p.name,p.note,p.category,p.series,p.section,p.collection,p.author,...(p.tags??[]),...(p.aliases??[])].join(' ').toLocaleLowerCase(),edge=Math.max(p.width,p.height);
+  const p=classifyCatalogEntry(entry),text=words.length?[p.name,p.note,p.category,p.series,p.section,p.collection,p.author,...catalogLabels(p),...(p.tags??[]),...(p.aliases??[])].join(' ').toLocaleLowerCase():'',edge=Math.max(p.width,p.height);
   return (category==='全部'||p.category===category)&&(series==='all'||p.series===series)&&(section==='all'||p.section===section)&&(collection==='all'||p.collectionId===collection)&&words.every(word=>text.includes(word))&&(size==='all'||(size==='small'?edge<=29:size==='medium'?edge>29&&edge<=52:edge>52))&&(colors==='all'||p.colorCount<=Number(colors));
  });
  if(sort==='beads-asc')found.sort((a,b)=>a.total-b.total);if(sort==='beads-desc')found.sort((a,b)=>b.total-a.total);return found;

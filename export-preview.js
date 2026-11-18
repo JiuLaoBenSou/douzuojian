@@ -1,4 +1,4 @@
-import {downloadBlob} from './lib/export.js?v=f3291c3218380e52';
+import {downloadBlob} from './lib/export.js?v=357b387ecd51994c';
 export function createExportPreview(){
  const dialog=document.getElementById('export-preview'),img=document.getElementById('export-image'),large=document.getElementById('export-open'),share=document.getElementById('export-share'),status=document.getElementById('export-message');
  let current=null,url=null;
