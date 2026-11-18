@@ -25,6 +25,10 @@ test('real URLs have server-rendered content, self canonicals and sitemap discov
  const home=await readFile(new URL('index.html',out),'utf8'),studio=await readFile(new URL('image-to-beads.html',out),'utf8'),collection=await readFile(new URL('collections/spring-flowers.html',out),'utf8');
  assert.match(home,/<h1>拼豆图纸与<br>图片转拼豆<\/h1>/);
  assert(home.includes('免费在线拼豆工具'));assert(home.includes('MARD 291 色'));assert(home.includes('href="/image-to-beads.html"'));
+ const recommendation=home.match(/<div id="featured-patterns"[^>]*>([\s\S]*?)<\/section>/)[1];
+ assert.match(recommendation,/<article class="featured-card">.*?class="collection-cover featured-cover category-sky"/s);
+ assert.match(recommendation,/href="\/patterns\/flower\.html"[^>]*data-pattern="flower"[^>]*>开始拼<\/a>/);
+ assert.match(recommendation,/1 × 1 格 · 1 色 · 1 颗/);
  assert.equal((home.match(/id="features-title"/g)||[]).length,1,'selling points appear once');
  assert.equal((listing.match(/id="catalog-intro"/g)||[]).length,1,'catalog introduction appears once');
  assert.equal((studio.match(/class="studio-benefits"/g)||[]).length,1,'workbench summary appears once');

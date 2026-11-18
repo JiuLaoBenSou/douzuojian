@@ -4,9 +4,8 @@ import {prepareEntry} from './startup-html.mjs';
 import {guides} from '../src/guides.js';
 import {classifyCatalogEntry,escapeHtml as esc} from '../src/catalog.js';
 import {patternPage} from '../src/lib/seo.js';
-import {featuredPatterns} from '../src/lib/featured.js';
 import {browseCatalog,catalogLabels} from '../src/lib/catalog-navigation.js';
-import {renderFolderCards} from '../src/lib/catalog-cards.js';
+import {renderFeaturedCards,renderFolderCards} from '../src/lib/catalog-cards.js';
 import {chartSvg} from '../src/lib/render.js';
 import {codeInk} from '../src/lib/chart.js';
 const SITE='https://douzuojian.com';
@@ -32,7 +31,7 @@ export async function buildSeo(root,out,index,load){
  const shared=base.replace('href="/__review/?all=1"','href="/#library"').replace(/href="#studio"/g,'href="/image-to-beads.html"').replace(/href="#guides"/g,'href="/guides/prep.html"').replace(/href="#library"/g,'href="/patterns/index.html"').replace(/href="#guides\/(prep|brands|problems)"/g,'href="/guides/$1.html"').replace(/(<a\b[^>]*\bhref=")#([^"]*)"/g,(_,prefix,target)=>prefix+(target==='main'?'#main':'/#'+target)+'"').replace('<a href="/#about">关于豆作间</a>','<a href="/#about">关于豆作间</a> · <a href="/image-to-beads.html">图片转拼豆</a> · <a href="/guides/prep.html">拼豆入门</a>');
  async function page(path,html,meta){const link=path==='index.html'?'/':'/'+path;await save(path,metadata(html,{...meta,path:link}));urls.push(SITE+link);}
  const collectionDoors=[['pokemon-gen1-pokedex','宝可梦图鉴拼豆图纸'],['sanrio-hello-kitty-charms','Hello Kitty（凯蒂猫）小图'],['demon-slayer-cat','鬼灭之刃猫耳造型图纸']].filter(([id])=>entries.some(p=>p.collectionId===id));
- const home=shared.replace(/(<div[^>]*id="featured-patterns"[^>]*>)[\s\S]*?<\/div>/,(_,tag)=>tag+featuredPatterns(entries).map(card).join('')+'</div>').replace('<!-- collection-shortcuts -->',collectionDoors.length?`<nav class="collection-shortcuts" aria-label="按题材找拼豆图纸"><span>按题材找图</span>${collectionDoors.map(([id,label])=>`<a href="/collections/${id}.html">${esc(label)} →</a>`).join('')}</nav>`:'');
+ const home=shared.replace('<div id="featured-patterns" class="featured-grid"></div>',()=>`<div id="featured-patterns" class="featured-grid">${renderFeaturedCards(entries.map(classifyCatalogEntry),true,index.contentVersion)}</div>`).replace('<!-- collection-shortcuts -->',collectionDoors.length?`<nav class="collection-shortcuts" aria-label="按题材找拼豆图纸"><span>按题材找图</span>${collectionDoors.map(([id,label])=>`<a href="/collections/${id}.html">${esc(label)} →</a>`).join('')}</nav>`:'');
  await page('index.html',home,{title:'豆作间｜拼豆图纸库与图片转拼豆工具',description:'免费在线拼豆工具：按角色和合集找图纸，上传图片转拼豆，查看 MARD 291 色参考色号与用豆量。支持改色、镜像、品牌换号，导出 PNG 图纸与 CSV 用量表。',schema:{name:'豆作间',alternateName:'豆作间拼豆'}});
  async function listing(path,title,rows,collection=''){
   let html=view(shared,'library',collection);
